@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <style>
+    .completed {
+      text-decoration: line-through;
+      color: grey;
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.24.0/babel.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js"></script>
+
+  <script type="text/babel">
+  const Title = ({count}) => {
+    return (
+      <div>
+         <h1>ToDo List ({count})</h1>
+      </div>
+    );
+  }
+  
+  const TodoForm = ({addTodo}) => {
+    // Input tracker
+    let input;
+
+    return (
+      <div>
+        <input ref={node => {
+          input = node;
+        }} />
+        <button onClick={() => {
+          addTodo(input.value);
+          input.value = '';
+        }}>
+          + Add
+        </button>
+      </div>
+    );
+  };
+  
+  const Todo = ({todo, remove, complete}) => {
+    // Each Todo
+    return (
+      <li>
+        <span className={todo.completed?'completed':null}>{todo.title}</span>
+        <b style={{ cursor: 'pointer' }} onClick={()=> {complete(todo)}}> V </b>
+        <b style={{ cursor: 'pointer' }} onClick={()=> {remove(todo)}}> X </b>
+      </li>);
+  }
+
+  const TodoList = ({todolist, remove, complete}) => {
+    // Map through the todolist
+    const todoItem = todolist.map((todo) => {
+      return (<Todo todo={todo} remove={remove} complete={complete} />)
+    });
+    return (<ul>{todoItem}</ul>);
+  }
+  
+  class TodoApp extends React.Component {
+    constructor(props) {
+      super(props);
+      this.removeTodo = this.removeTodo.bind(this)
+      this.indexOfElement = this.indexOfElement.bind(this)
+      this.completeTodo = this.completeTodo.bind(this)
+      this.addTodo = this.addTodo.bind(this)
+      this.state = {
+        data: [
+          {title: "buy milk",completed: false},
+          {title: "send letter",completed: true},
+          {title: "meet with friend",completed: false}
+        ]
+      }
+    }
+    
+    indexOfElement(todo){
+      let data = this.state.data;
+      let indexOf = -1
+      data.forEach((item, index) => {
+        if(item.title === todo.title){
+          console.log(item.title)
+          indexOf = index;
+        }
+      })
+      return indexOf;
+    }
+    
+    removeTodo(todo){
+      let data = this.state.data;
+      let indexOfRemovedElem= this.indexOfElement(todo)
+      console.log(data.indexOf(todo))
+      data.splice(indexOfRemovedElem, 1)
+      this.setState({data: data})
+    }
+    
+    completeTodo(todo){
+      let data = this.state.data;
+      let indexOfRemovedElem = this.indexOfElement(todo)
+      data.splice(indexOfRemovedElem, 1, {title:todo.title, completed:!todo.completed})
+      this.setState({data: data})
+      console.log(this.state.data)
+    }
+    
+    addTodo(todoTitle){
+      let data = this.state.data;
+      data.push({title: todoTitle, completed: false})
+      this.setState({data: data})
+      console.log(this.state.data)
+    }
+    
+    render() {
+      return (
+        <div>
+          <Title count={this.state.data.length} />
+          <TodoForm addTodo={this.addTodo} />
+          <TodoList todolist={this.state.data} remove={this.removeTodo} complete={this.completeTodo} />
+        </div>
+      );
+    }
+  }
+  
+  ReactDOM.render(
+    <TodoApp />,
+    document.getElementById('root')
+  );
+  </script>
+  
+</body>
+</html>
